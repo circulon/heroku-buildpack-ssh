@@ -29,7 +29,7 @@ chmod 700 $SSH_DIR/
 cp $ENV_DIR/SSH_KEY $SSH_DIR/id_rsa
 chmod 400 $SSH_DIR/id_rsa
 
-echo 'StrictHostKeyChecking=no\nHost bitbucket.org\nIdentityFile $SSH_DIR/id_rsa' > $SSH_DIR/config
+echo "StrictHostKeyChecking=no\nHost bitbucket.org\nIdentityFile $SSH_DIR/id_rsa" > $SSH_DIR/config
 chmod 600 $SSH_DIR/config
 
 mkdir -p "$BUILD_DIR/.profile.d"
