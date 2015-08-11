@@ -19,28 +19,38 @@
 
 #set -e
 BUILD_DIR=$1
-SSH_DIR=~/.ssh
+CACHE_DIR=$2
+ENV_DIR=$3
+
+mkdir -p ~/.ssh/
+chmod 700 ~/.ssh/
 
 echo "-----> Running SSH private key setup"
 
-mkdir -p $SSH_DIR/
-chmod 700 $SSH_DIR/
-
 if [ -n "$SSH_KEY" ]; then
-  echo "$SSH_KEY" | base64 --decode > $SSH_DIR/id_rsa
-  chmod 400 $SSH_DIR/id_rsa
+  mv $ENV_DIR/SSH_KEY ~/.ssh/id_rsa
+  chmod 400 ~/.ssh/id_rsa
 
+  #echo "-----> Validating key with Github"
   #ssh -oStrictHostKeyChecking=no -T git@github.com 2>&1 | indent
+
+  echo "-----> Validating key with Bitbucket"
   ssh -oStrictHostKeyChecking=no -T git@bitbucket.org 2>&1 | indent
 
-  #echo "Host bitbucket.org\nIdentityFile $SSH_DIR/id_rsa\nStrictHostKeyChecking no" > $SSH_DIR/config
-  #echo "Host bitbucket.org\nIdentityFile $SSH_DIR/id_rsa\nStrictHostKeyChecking no" > $SSH_DIR/config
-  #chmod 600 $SSH_DIR/config
-  exit 0
+  echo 'StrictHostKeyChecking=no' > ~/.ssh/config
+  chmod 600 ~/.ssh/config
 
+  mkdir -p "$BUILD_DIR/.profile.d"
+  # Conceal SSH_KEY from runtime.
+  cat > "$BUILD_DIR/.profile.d/00-clobber-ssh-key.sh" << EOF
+  echo 'unsetting ssh deploy key'
+  unset -v SSH_KEY
+  EOF
+
+  exit 0
 else
   echo "-----> No SSH private key found "
-  echo "try --->  heroku config:set SSH_KEY=$(cat ~/.ssh/id_rsa | base64)"
+  echo "-----> use heroku config:set SSH_KEY='`cat /path/to/key`'"
   exit 1
 fi
 
