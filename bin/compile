@@ -17,7 +17,6 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------------------
 
-#set -e
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
@@ -28,7 +27,7 @@ chmod 700 ~/.ssh/
 echo "-----> Running SSH private key setup"
 
 if [ -n "$SSH_KEY" ]; then
-  mv $ENV_DIR/SSH_KEY ~/.ssh/id_rsa
+  mv "$ENV_DIR/SSH_KEY" ~/.ssh/id_rsa
   chmod 400 ~/.ssh/id_rsa
 
   #echo "-----> Validating key with Github"
@@ -43,9 +42,9 @@ if [ -n "$SSH_KEY" ]; then
   mkdir -p "$BUILD_DIR/.profile.d"
   # Conceal SSH_KEY from runtime.
   cat > "$BUILD_DIR/.profile.d/00-clobber-ssh-key.sh" << EOF
-  echo 'unsetting ssh deploy key'
-  unset -v SSH_KEY
-  EOF
+echo 'unsetting ssh deploy key'
+unset -v SSH_KEY
+EOF
 
   exit 0
 else
